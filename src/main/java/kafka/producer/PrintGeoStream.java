@@ -103,6 +103,7 @@ public final class PrintGeoStream {
                 String message = gson.toJson(tweetInfo, TweetInfo.class);
                 
                 kafkaProducer.send(new ProducerData<Integer, String>("live_tweets_full_geo", message));
+                //kafkaProducer.send(new ProducerData<Integer, String>("live_tweets", message));
             }
 
             @Override

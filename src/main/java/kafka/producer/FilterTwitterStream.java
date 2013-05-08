@@ -201,8 +201,9 @@ public final class FilterTwitterStream {
                 String message = gson.toJson(tweetInfo, TweetInfo.class);
                 
                 kafkaProducer.send(new ProducerData<Integer, String>("live_tweets", message));
-                LOG.info("screen_name: " + tweetInfo.getUserScreen() + ": lat/lon: " + tweetInfo.getLat() + "/" + 
-                         tweetInfo.getLon() + "  place: " + tweetInfo.getPlaceName() + " - text: " + tweetInfo.getTweetText());
+                //LOG.info("screen_name: " + tweetInfo.getUserScreen() + ": lat/lon: " + tweetInfo.getLat() + "/" + 
+                //         tweetInfo.getLon() + "  place: " + tweetInfo.getPlaceName() + " - text: " + tweetInfo.getTweetText());
+                //kafkaProducer.send(new ProducerData<Integer, String>("live_tweets_full_geo", message));
                 
                 // Note this spits JSON string to the channel, find out if we just want a subset of this instead!
                 // user_screen, tweet_created, url(avatar), country, lat/lon, tweet_text
@@ -331,6 +332,10 @@ public final class FilterTwitterStream {
                     locations = update.getLocations();
                 }
                 double[][] theWorld = {{-180, -90},{180, 90}};
+                LOG.info("Setting FilterQuery with userIds:" + userIds + " - terms: " + hashtags +
+                        " - location box: " + locations);
+                
+                
                 FilterQuery filterQuery = new FilterQuery(0, userIds, hashtags, locations);
                    
                 //FilterQuery filterQuery = new FilterQuery();
