@@ -56,18 +56,23 @@ public final class PrintGeoStream {
     /**
      * Main entry of this application.
      *
-     * @param args follow(comma separated user ids) track(comma separated filter terms)
+     * @param args <kafka host> <kafka topic>
      * @throws twitter4j.TwitterException
      */
     public static void main(String[] args) throws TwitterException {
-/*
-        if (args.length < 1) {
-            System.out.println("Usage: java twitter4j.examples.PrintFilterStream [follow(comma separated numerical user ids)] [track(comma separated filter terms)]");
+
+        if (args.length != 2) {
+            System.out.println("Usage: java twitter4j.examples.PrintFilterStream  <kafka host>  <kafka topic>");
             System.exit(-1);
         }
-*/
+        
+        final String kafkaZKHost = args[0];
+        final String kafkaTopic = args[1];
+
         BasicConfigurator.configure();
+        
         StatusListener listener = new StatusListener() {
+            
             Gson gson = new Gson();
             
             Properties kafkaProps = new Properties();
@@ -82,7 +87,8 @@ public final class PrintGeoStream {
             public void onStatus(Status status) {
                 if ( kafkaProducer == null ) {
                     kafkaProps.put("serializer.class", "kafka.serializer.StringEncoder");
-                    kafkaProps.put("zk.connect", "localhost:2181");
+                    //kafkaProps.put("zk.connect", "localhost:2181");
+                    kafkaProps.put("zk.connect", kafkaZKHost.concat(":2181"));
                     kafkaProducer = new Producer<Integer, String>(new ProducerConfig(kafkaProps));
                     
                 }
@@ -102,7 +108,7 @@ public final class PrintGeoStream {
                 tweetInfo.populate(status);
                 String message = gson.toJson(tweetInfo, TweetInfo.class);
                 
-                kafkaProducer.send(new ProducerData<Integer, String>("live_tweets_full_geo", message));
+                kafkaProducer.send(new ProducerData<Integer, String>(kafkaTopic, message));
                 //kafkaProducer.send(new ProducerData<Integer, String>("live_tweets", message));
             }
 

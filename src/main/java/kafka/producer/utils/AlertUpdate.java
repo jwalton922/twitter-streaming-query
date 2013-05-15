@@ -27,6 +27,14 @@ public class AlertUpdate {
         searchterms = null;
         latLonBoxes = null;
     }
+    
+    public AlertUpdate(String[] users, String[] terms, LatLonBox[] boxes) {
+        usernames = users;
+        usernamesNoAtSigns = getusernamesNoAtSigns();
+        searchterms = terms;
+        latLonBoxes = boxes;
+    }
+    
     public String[] getUserNames() {
         return usernames;
     }
@@ -54,7 +62,7 @@ public class AlertUpdate {
         return back;
     }
     public String[] getusernamesNoAtSigns() {
-        if ( usernamesNoAtSigns == null ) {
+        if ( usernamesNoAtSigns == null && usernames != null ) {
             usernamesNoAtSigns = new String[usernames.length];
             String tempString = null;
             int jj = 0;

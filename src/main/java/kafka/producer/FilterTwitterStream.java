@@ -55,6 +55,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.log4j.Logger;
 import org.apache.log4j.BasicConfigurator;
 
+import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisPubSub;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -64,6 +65,37 @@ import redis.clients.jedis.JedisPool;
  *   - Accept tweet filter updates from Redis topic
  *   - Push every tweet to a Kafka topic
  *   - Push every tweet to a Redis channel
+ *   
+ * Stats:
+ *   - With no Kafka publishing, and full geo enabled (e.g. world) - incoming
+ *       message rate is a steady 50/s
+ * 
+ * Limits:
+ *   - Follow 
+ *       - can only follow public accounts e.g. not mrcy_intel
+ *       - on multiples: e.g. @cnallen @freedos123
+ *           - with geo on - first guy usually get those - second guy never!       
+ *       - With full geo on - this is VERY spotty (e.g. you don't always get your tweets!)       
+ *       - full geo plus name plus term - rarely get it! 
+ *       - single name with multiple terms - full geo - flaky 
+ *       - single name, multiple terms, no geo - good    
+ *   
+ *   - Terms:
+ *       - Multiple terms works, but again it is a sample - so you may not get EVERY
+ *           time someone tweets a term
+ *       - No commas! e.g. @freedos123 chocolate, bitter, kobe will alert on terms:
+ *           'chocolate,' 'bitter,' 'kobe'
+ *           
+ *   - Once you start having issues with multiple users/terms - changing order
+ *       does not help, but putting in single user sometimes fixes it
+ *   - Restarting the filter process, and resubmitting the alert criteria, often
+ *       fixes the filtering not working
+ *   - Sometimes re-setting filter with geo off fixes things
+ *       
+ *       
+ *    
+ *           
+ *   
  *
  */
 public final class FilterTwitterStream {
@@ -88,12 +120,13 @@ public final class FilterTwitterStream {
     
     static class RedisListenerThread extends Thread {
         //LinkedBlockingQueue<String> queue;
-        //JedisPool pool;
+        JedisPool pool;
         String topic;
         
-        public RedisListenerThread(LinkedBlockingQueue<String> queue, String channel) {
+        //public RedisListenerThread(LinkedBlockingQueue<String> queue, String channel) {
+        public RedisListenerThread(JedisPool jPool, String channel) {
             //this.queue = queue;
-            //this.pool = pool;
+            this.pool = jPool;
             this.topic = channel;
         }
         
@@ -134,16 +167,16 @@ public final class FilterTwitterStream {
                 }
             };
             
-            //Jedis jedis = pool.getResource();
-            Jedis subscriberJedis = new Jedis("localhost", 6379, 0);
+            Jedis subscriberJedis = pool.getResource();
+            //Jedis subscriberJedis = new Jedis("localhost", 6379, 0);
             try {
                 subscriberJedis.subscribe(listener, topic);
                 //jedis.psubscribe(listener, pattern);
             } catch (Exception e) {
                 LOG.error("Redis Alert Udate Subscribing failed.", e);
-            }// finally {
-            //    pool.returnResource(jedis);
-            //}
+            } finally {
+                pool.returnResource(subscriberJedis);
+            }
         }
     }
     
@@ -154,12 +187,21 @@ public final class FilterTwitterStream {
      * @throws twitter4j.TwitterException
      */
     public static void main(String[] args) throws TwitterException {
-/*
-        if (args.length < 1) {
-            System.out.println("Usage: java twitter4j.examples.PrintFilterStream [follow(comma separated numerical user ids)] [track(comma separated filter terms)]");
+
+        if (args.length != 3) {
+            System.out.println("Usage: java twitter4j.examples.PrintFilterStream  <kafka host>  <kafka topic>  <redis host>");
             System.exit(-1);
         }
-*/
+        
+        final String kafkaZKHost = args[0];
+        final String kafkaTopic = args[1];
+        final String redisHost = args[2];
+        
+        
+        JedisPoolConfig poolConfig = new JedisPoolConfig();        
+        JedisPool jedisPool = new JedisPool(poolConfig, redisHost, 6379, 0);
+        
+
         BasicConfigurator.configure();
         gson = new Gson();
         
@@ -172,15 +214,18 @@ public final class FilterTwitterStream {
             Producer<Integer, String> kafkaProducer = null;
             int tweetCount = 0;
             int interimCount = 0;
+            long currentTime = 0;
+            long lastTime = 0;
             
-            Jedis publisherJedis = new Jedis("localhost", 6379, 0);
+            //Jedis publisherJedis = new Jedis("localhost", 6379, 0);
             
             
             @Override
             public void onStatus(Status status) {
                 if ( kafkaProducer == null ) {
                     kafkaProps.put("serializer.class", "kafka.serializer.StringEncoder");
-                    kafkaProps.put("zk.connect", "localhost:2181");
+                    //kafkaProps.put("zk.connect", "localhost:2181");
+                    kafkaProps.put("zk.connect", kafkaZKHost.concat(":2181"));
                     kafkaProducer = new Producer<Integer, String>(new ProducerConfig(kafkaProps));
                     
                 }
@@ -188,7 +233,10 @@ public final class FilterTwitterStream {
                 interimCount++;
                 if ( interimCount == 100 ) {
                     LOG.info(" total tweets received: " + tweetCount);
+                    currentTime = System.currentTimeMillis()/1000;
+                    LOG.info("incoming msg rate: " + 100/(currentTime - lastTime));
                     interimCount = 0;
+                    lastTime = currentTime;
                 }
                 
                 // System.out.println("@" + status.getUser().getScreenName() + " - "); // + status.getText());
@@ -200,7 +248,8 @@ public final class FilterTwitterStream {
                 tweetInfo.populate(status);
                 String message = gson.toJson(tweetInfo, TweetInfo.class);
                 
-                kafkaProducer.send(new ProducerData<Integer, String>("live_tweets", message));
+                //kafkaProducer.send(new ProducerData<Integer, String>("live_tweets", message));
+                kafkaProducer.send(new ProducerData<Integer, String>(kafkaTopic, message));
                 //LOG.info("screen_name: " + tweetInfo.getUserScreen() + ": lat/lon: " + tweetInfo.getLat() + "/" + 
                 //         tweetInfo.getLon() + "  place: " + tweetInfo.getPlaceName() + " - text: " + tweetInfo.getTweetText());
                 //kafkaProducer.send(new ProducerData<Integer, String>("live_tweets_full_geo", message));
@@ -243,7 +292,7 @@ public final class FilterTwitterStream {
          */
         
         // start message listener
-        RedisListenerThread redis = new RedisListenerThread(redisMessageQueue, redisAlertUpdateTopic);
+        RedisListenerThread redis = new RedisListenerThread(jedisPool, redisAlertUpdateTopic);
         redis.start();
 
         twitterStream = new TwitterStreamFactory().getInstance();
