@@ -86,7 +86,7 @@
         
         <dependency>
             <groupId>kafka</groupId>
-            <artifactId>kafka_2.9.2</artifactId>
+            <artifactId>kafka_2.8.0</artifactId>
             <version>0.7.2</version>
             <type>jar</type>
         </dependency>
