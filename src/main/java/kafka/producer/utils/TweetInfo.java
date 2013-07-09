@@ -39,7 +39,7 @@ public class TweetInfo {
     
     private Map<String, String> tupleMap; // = new LinkedHashMap();
     
-    // Think you have to have this for Gson to work
+    // Think you have to have this for Gson to serialize tweet objects
     public TweetInfo() {
         user_id = 0;
         user_created = null;
