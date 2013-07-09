@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>twitter-demo-streaming</groupId>
@@ -7,12 +8,12 @@
     <packaging>jar</packaging>
     <name>streaming_geo_tweets</name>
     <description>Jar with classes for streaming geo-enabled tweets to Kafka topic</description>
-	<repositories>
-		<repository>
-			<id>clojars.org</id>
-			<url>http://clojars.org/repo</url>
-		</repository>
-	</repositories>
+    <repositories>
+        <repository>
+            <id>clojars.org</id>
+            <url>http://clojars.org/repo</url>
+        </repository>
+    </repositories>
     <profiles>
         <profile>
             <id>release-sign-artifacts</id>
@@ -83,20 +84,20 @@
         </dependency>
 
         <!-- START kafka -->
-        
+
         <dependency>
             <groupId>kafka</groupId>
             <artifactId>kafka_2.9.2</artifactId>
             <version>0.7.2</version>
             <type>jar</type>
         </dependency>
-        
-<!--        <dependency>
-            <groupId>org.apache.kafka</groupId>
-            <artifactId>kafka</artifactId>
-            <version>0.7.2</version>
-            <type>jar</type>
-        </dependency>-->
+
+        <!--        <dependency>
+                    <groupId>org.apache.kafka</groupId>
+                    <artifactId>kafka</artifactId>
+                    <version>0.7.2</version>
+                    <type>jar</type>
+                </dependency>-->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
@@ -185,82 +186,82 @@
     <build>
         <defaultGoal>install</defaultGoal>
         <plugins>
-        <!--
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.3.2</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                    <source>5</source>
-                    <target>5</target>
-                </configuration>
-                <version>2.5.1</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifestFile>src/main/resources/META-INF/MANIFEST.MF
-                        </manifestFile>
-                        <manifest>
-                            <addDefaultSpecificationEntries>true
-                            </addDefaultSpecificationEntries>
-                            <addDefaultImplementationEntries>true
-                            </addDefaultImplementationEntries>
-                        </manifest>
-                    </archive>
-                </configuration>
-                <version>2.4</version>
-            </plugin>
+            <!--
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-release-plugin</artifactId>
+                    <version>2.3.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <encoding>UTF-8</encoding>
+                        <source>5</source>
+                        <target>5</target>
+                    </configuration>
+                    <version>2.5.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <configuration>
+                        <archive>
+                            <manifestFile>src/main/resources/META-INF/MANIFEST.MF
+                            </manifestFile>
+                            <manifest>
+                                <addDefaultSpecificationEntries>true
+                                </addDefaultSpecificationEntries>
+                                <addDefaultImplementationEntries>true
+                                </addDefaultImplementationEntries>
+                            </manifest>
+                        </archive>
+                    </configuration>
+                    <version>2.4</version>
+                </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <version>2.1.2</version>
-            </plugin>
-            <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>javadoc-jar</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <configuration>
-                            <excludePackageNames>
-                            </excludePackageNames>
-                        </configuration>
-                    </execution>
-                </executions>
-                <configuration>
-                    <charset>UTF-8</charset>
-                    <show>public</show>
-                </configuration>
-                <version>2.8.1</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-resources-plugin</artifactId>
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-                <version>2.5</version>
-            </plugin>
-        -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <version>2.1.2</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>javadoc-jar</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                            <configuration>
+                                <excludePackageNames>
+                                </excludePackageNames>
+                            </configuration>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <charset>UTF-8</charset>
+                        <show>public</show>
+                    </configuration>
+                    <version>2.8.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <configuration>
+                        <encoding>UTF-8</encoding>
+                    </configuration>
+                    <version>2.5</version>
+                </plugin>
+            -->
 
             <!--
             bind the maven-assembly-plugin to the package phase
@@ -278,7 +279,7 @@
                             <mainClass></mainClass>
                         </manifest>
                         <manifestEntries>
-                            <Class-Path>.</Class-Path> 
+                            <Class-Path>.</Class-Path>
                         </manifestEntries>
                         <!--
                         -->
