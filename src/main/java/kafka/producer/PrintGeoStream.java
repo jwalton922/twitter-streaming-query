@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
 import twitter4j.*;
 
 import java.util.Properties;
+import twitter4j.auth.AccessToken;
 
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
@@ -48,13 +49,16 @@ public final class PrintGeoStream {
      */
     public static void main(String[] args) throws TwitterException {
 
-        if (args.length != 2) {
-            System.out.println("Usage: java twitter4j.examples.PrintFilterStream  <kafka host>  <kafka topic>");
-            System.exit(-1);
-        }
+//        if (args.length != 2) {
+//            System.out.println("Usage: java twitter4j.examples.PrintFilterStream  <kafka host>  <kafka topic>");
+//            System.exit(-1);
+//        }
 
-        final String kafkaZKHost = args[0];
-        final String kafkaTopic = args[1];
+//        final String kafkaZKHost = args[0];
+//        final String kafkaTopic = args[1];
+        
+        final String kafkaZKHost = "localhost";
+        final String kafkaTopic = "flightDelay";
 
         BasicConfigurator.configure();
 
@@ -142,7 +146,10 @@ public final class PrintGeoStream {
          * 
          */
 
+        
         TwitterStream twitterStream = new TwitterStreamFactory().getInstance();
+//        twitterStream.setOAuthAccessToken(new AccessToken("14098069-IgutahzmbaCubdoMU0MxsfsJT2iNVpRnoohCbV67k", "d1kFKqRSnrlA4bP1XWWLiHNsHfYDZQPWDHRVpGP4hM"));
+//        twitterStream.setOAuthConsumer("G0SKTmMXjfMsunBh3Furg", "iVTYNLqVaVdUZz4xOn7H8ywylTaTuW3kH1dT21NUy4");
         twitterStream.addListener(listener);
         /*
          * For CONUS only: 
@@ -152,8 +159,14 @@ public final class PrintGeoStream {
          *  "upperLon": "-67.0"
          */
         FilterQuery fQuery = new FilterQuery();
-        double[][] theWorld = {{-180, -90}, {180, 90}};
-        fQuery.locations(theWorld);
+        String[] topics = new String[2];
+        topics[0] = "delayed flight";
+        topics[1] = "flight delay";
+        
+//        double[][] us = {{-180, 24}, {-66, 50}};
+        double[][] lax = {{-118.5, 33.8}, {-118.3, 34.01}};
+        fQuery.locations(lax);
+        fQuery.track(topics);
         twitterStream.filter(fQuery);
 
     }
